@@ -10,8 +10,6 @@ client.on('connect', function () {
   for(let i=0;i < 5;i++) client.publish('test', Math.random().toString());
 })
 
-
-
 client.on('message', function (topic, message) {
   // message is Buffer
   console.log(message.toString())
