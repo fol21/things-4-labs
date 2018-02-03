@@ -1,16 +1,13 @@
+const readline = require('readline');
 const mqtt = require('mqtt');
 const program = require('commander');
+
 
 
 class MqttConsoleMonitor {
 
     constructor(config = {}) {
-        this.host = config.host;
-        this.port = config.port;
-        this.client = mqtt.connect({
-            host: program.host || config.host,
-            port: program.port || config.port
-        });
+
         this.program = program
             .version('0.1.0')
             .option('-t, --topic <n>', 'Choose topic to be subscribed', (val) => {
@@ -18,13 +15,24 @@ class MqttConsoleMonitor {
             })
             .option('-c, --context <n>', 'Add context to incoming messages')
             .option('-h, --host <n>', 'Overrides pre-configure host')
-            .option('-p, --port <n>', 'Overrides pre-configure port', parseInt);
+            .option('-p, --port <n>', 'Overrides pre-configure port', parseInt)
+            .parse(process.argv);
 
+        this.host = program.host || config.host;
+        this.port = program.port || config.port
+        
         this.messageCallback = null;
+
+        this.topic = null;
+        if (program.topic) {
+            this.topic = program.topic;
+        } else {
+            console.log("Topic is required (run program with -t <topic> flag)")
+            process.exit();
+        }
     }
 
-    _defaultMessageCallback(topic, message)
-    {
+    _defaultMessageCallback(topic, message) {
         // message is Buffer
         if (program.context) console.log(`${program.context} ${message}`);
         else console.log(message.toString());
@@ -49,23 +57,21 @@ class MqttConsoleMonitor {
      */
     init() {
 
-        program.parse(process.argv);
+        //program.parse(process.argv);
 
-        if (program.topic) {
-            this.client.on('connect',
-                () => {
-                    console.log(`Connected, Listening to:
-            host: ${program.host || conf.mqtt.host } 
-            port: ${program.port|| conf.mqtt.port} 
-            topic: ${program.topic}`);
-                    this.client.subscribe(program.topic);
-                });
-
-            this.client.on('message', this.messageCallback || this._defaultMessageCallback)
-        } else {
-            console.log("You must specify a topic to listen (use -t 'your topic').");
-            process.exit();
-        }
+        this.client = mqtt.connect({
+            host: this.host,
+            port: this.port
+        });
+        this.client.on('connect',
+            () => {
+                console.log(`Connected, Listening to:
+            host: ${this.host} 
+            port: ${this.port} 
+            topic: ${this.topic}`);
+                this.client.subscribe(this.topic);
+            });
+        this.client.on('message', this.messageCallback || this._defaultMessageCallback)
     }
 
 
