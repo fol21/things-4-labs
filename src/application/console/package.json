@@ -1,0 +1,16 @@
+{
+  "name": "t4l-console",
+  "version": "0.0.1",
+  "description": "Console for monitoring data.",
+  "main": "index.js",
+  "scripts": {
+    "test": "node ./test/test.js",
+    "listen": "node index.js"
+  },
+  "author": "Fernando Lima <folivelima@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^2.13.0",
+    "mqtt": "^2.15.1"
+  }
+}
