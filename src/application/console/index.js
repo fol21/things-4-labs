@@ -1,6 +1,3 @@
-const mqtt = require('mqtt');
-const program = require('commander');
-
 const MqttConsoleMonitor = require('./src/MqttConsoleMonitor.js') 
 
 const conf = require('./resources/config.json');

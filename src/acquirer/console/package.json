@@ -1,0 +1,16 @@
+{
+  "name": "mqtt-consolet4l-console-client",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Fernando Lima <folivelima@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "commander": "^2.13.0",
+    "mqtt": "^2.15.1",
+    "onoff": "^1.1.9"
+  }
+}
