@@ -1,9 +1,7 @@
 const mqtt = require('mqtt');
 const program = require('commander');
-const Gpio = require('onoff');
 
-
-class MqttConsolePublisher {
+class MqttPublisher {
     constructor(config = {}) {
 
         this.program = program
@@ -15,23 +13,39 @@ class MqttConsolePublisher {
             .option('-c, --context <n>', 'Add context to incoming messages')
             .option('-h, --host <n>', 'Overrides pre-configure host')
             .option('-p, --port <n>', 'Overrides pre-configure port', parseInt)
-            .parse(process.argv);
 
         this.host = program.host || config.host;
         this.port = program.port || config.port
-
-        this.messageCallback = null;
-
+        this.allowExit = config.allowExit || true;
         this.topic = null;
+    }
+
+    publish(message) {
+        try {
+            if (this.client.connected) {
+                this.client.publish(this.topic, message)
+            } else console.log('Unable to publish. No connection avaible.')
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    init() {
+
+        this.program.parse(process.argv);
+
         if (program.topic) {
             this.topic = program.topic;
         } else {
             console.log("Topic is required (run program with -t <topic> flag)")
             process.exit();
         }
-    }
 
-    publish(message='') {
+        this.client = mqtt.connect({
+            host: this.host,
+            port: this.port
+        });
+
         this.client.on('connect',
             () => {
                 console.log(`Connected, Listening to:
@@ -39,18 +53,12 @@ class MqttConsolePublisher {
                 port: ${this.port} 
                 topic: ${this.topic}`);
 
-                this.client.publish(this.topic, message)
+                if (program.message) {
+                    this.publish(program.message);
+                    if (this.allowExit) process.exit();
+                }
             });
-
-    }
-
-    init() {
-        this.client = mqtt.connect({
-            host: this.host,
-            port: this.port
-        });
-        if(program.message) this.publish(program.message);
     }
 }
 
-module.exports = MqttConsolePublisher;
+module.exports = MqttPublisher;
