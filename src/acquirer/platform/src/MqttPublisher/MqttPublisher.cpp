@@ -3,8 +3,6 @@
 
 MqttPublisher::MqttPublisher(Client& client, MqttConfiguration& config)
 {
-    this->ssid = config.ssid;
-    this->password = config.password;
     this->client_id = config.client_id;
     this->host = config.host;
     this->port = config.port;
@@ -14,11 +12,9 @@ MqttPublisher::MqttPublisher(Client& client, MqttConfiguration& config)
 
 
 
-MqttPublisher::MqttPublisher(Client& client, char* ssid, char* password, char* client_id, char* host, 
+MqttPublisher::MqttPublisher(Client& client,  char* client_id, char* host, 
                                 unsigned int port, char* topic)
 {
-    this->ssid = ssid;
-    this->password = password;
     this->client_id = client_id;
     this->host = host;
     this->port = port;
@@ -26,9 +22,23 @@ MqttPublisher::MqttPublisher(Client& client, char* ssid, char* password, char* c
     this->pubSubClient = new PubSubClient(client); 
 }
 
+
+String MqttPublisher::publish(const char* message, const char* context)
+{
+    if(this->pubSubClient->connected()) 
+    {
+        std::string c(context);
+        std::string m(message);
+        pubSubClient->publish(this->topic, (c + " : " + m).c_str());
+        return message;
+    }
+    else return "" + pubSubClient->state();
+}
+
+
 String MqttPublisher::publish(const char* message)
 {
-    if(!pubSubClient->connected()) 
+    if(this->pubSubClient->connected()) 
     {
         pubSubClient->publish(this->topic, message);
         return message;
@@ -36,10 +46,25 @@ String MqttPublisher::publish(const char* message)
     else return "" + pubSubClient->state();
 }
 
-bool MqttPublisher::init(void (*connectionHandler)(void))
+void MqttPublisher::init(void (*connectionHandler)(void))
 {
-  (*connectionHandler)();
   this->pubSubClient->setServer(this->host, this->port);
-  return this->pubSubClient->connect(this->client_id);
+  (*connectionHandler)();
 }
+
+bool MqttPublisher::reconnect(void(*handler)(bool))
+{
+    (*handler)(this->pubSubClient->connect(this->client_id));
+}
+
+bool MqttPublisher::connected()
+{
+    return this->pubSubClient->connected();
+}
+
+int MqttPublisher::getClientState()
+{
+    return this->pubSubClient->state();
+}
+
 

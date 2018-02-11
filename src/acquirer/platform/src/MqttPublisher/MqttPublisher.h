@@ -1,8 +1,9 @@
 #ifndef MQTTPUBLISHER_H
 #define MQTTPUBLISHER_H
 
-#include <ESP8266WiFi.h>
+#include <string>
 #include <PubSubClient.h>
+
 
 struct MqttConfiguration
 {
@@ -19,14 +20,16 @@ class MqttPublisher
 public:
 
     MqttPublisher(Client&, MqttConfiguration& config);
-    MqttPublisher(Client&, char*, char*, char*, char*, unsigned int, char*);
+    MqttPublisher(Client&, char*, char*, unsigned int, char*);
     String publish(const char*);
-    bool init(void (*)(void));
+    String publish(const char*, const char*);
+    void init(void (*)(void));
+    bool reconnect(void(*handler)(bool));
+    bool connected();
+    int getClientState();
 
 private:
     
-    char* ssid = NULL;
-    char* password = NULL;
     char* client_id = NULL;
     char* host = NULL;
     unsigned int port = 0; 
