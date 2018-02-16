@@ -1,4 +1,4 @@
-#include "MqttPublisher.h"
+#include <MqttPublisher.h>
 
 
 MqttPublisher::MqttPublisher(Client& client, MqttConfiguration& config)
@@ -10,8 +10,6 @@ MqttPublisher::MqttPublisher(Client& client, MqttConfiguration& config)
     this->pubSubClient = new PubSubClient(client); 
 }
 
-
-
 MqttPublisher::MqttPublisher(Client& client,  char* client_id, char* host, 
                                 unsigned int port, char* topic)
 {
@@ -20,6 +18,16 @@ MqttPublisher::MqttPublisher(Client& client,  char* client_id, char* host,
     this->port = port;
     this->topic = topic;
     this->pubSubClient = new PubSubClient(client); 
+}
+
+void MqttPublisher::addStream(const char* streamName)
+{
+    this->streamList.push_back(streamName);
+}
+
+void MqttPublisher::removeStream(const char* streamName)
+{
+    this->streamList.remove(streamName);
 }
 
 
@@ -54,6 +62,19 @@ void MqttPublisher::init(void (*connectionHandler)(void))
 
 bool MqttPublisher::reconnect(void(*handler)(bool))
 {
+    this->pubSubClient->subscribe(CONTINOUS_STREAM);
+    this->pubSubClient->subscribe(PERIODIC_STREAM);
+    this->pubSubClient->subscribe(AVERAGE_STREAM);
+
+    if(this->streamList.empty())
+    {
+        for (std::list<const char*>::iterator it=this->streamList.begin(); 
+                it!=this->streamList.end(); ++it)
+        {
+            this->pubSubClient->subscribe(*it);
+        }
+    }
+
     (*handler)(this->pubSubClient->connect(this->client_id));
 }
 

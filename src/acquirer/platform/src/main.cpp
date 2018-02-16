@@ -1,6 +1,6 @@
 #include <ESP8266WiFi.h>
 
-#include "MqttPublisher/MqttPublisher.h"
+#include <MqttPublisher.h>
 
 struct MqttConfiguration config = {"FOL", "21061992", "ESP8266-test", "192.168.15.5", 1883, "/test"};
 WiFiClient espClient;
@@ -32,7 +32,7 @@ void loop()
 {
   while(!publisher.connected())
   {
-    publisher.reconnect(s
+    publisher.reconnect(
       [=](bool result)
       {
         if(result)
