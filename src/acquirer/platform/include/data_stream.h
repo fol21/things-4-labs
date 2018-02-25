@@ -4,9 +4,9 @@
 #include <string.h>
 
 #define ARRAY_SIZE(x)  (sizeof(x) / sizeof((x)[0])) 
-#define CONTINOUS_STREAM "/stream:continous"
-#define AVERAGE_STREAM "/stream:average"
-#define PERIODIC_STREAM "/stream:periodic"
+#define CONTINOUS_STREAM "continous"
+#define AVERAGE_STREAM "average"
+#define PERIODIC_STREAM "periodic"
 
 class data_stream
 {
@@ -21,7 +21,7 @@ public:
     //overridable stream process
     virtual void Process(void (*)(void));
 
-    char* send(char*); // send message after process is done
+    const char* send(const char*); // send message after process is done
 
     bool operator==(const data_stream& o )
     {
@@ -45,7 +45,7 @@ class continous_stream : public data_stream
 
         void Process(){};
 
-        char* send(char*); // send message after process is done
+        const char* send(const char*); // send message after process is done
 
 };
 

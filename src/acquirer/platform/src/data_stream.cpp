@@ -21,7 +21,7 @@ void data_stream::Process(void (*process)(void))
     this->process = process;
 };
 
-char* data_stream::send(char* message)
+const char* data_stream::send(const char* message)
 {
     this->process();
     if(this->threshold != 0)
@@ -34,7 +34,7 @@ char* data_stream::send(char* message)
 
 //Continous Stream
 
-char* continous_stream::send(char* message)
+const char* continous_stream::send(const char* message)
 {
   return data_stream::send(message);  
 }

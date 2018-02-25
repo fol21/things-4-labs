@@ -38,7 +38,7 @@ void loop()
         if(result)
         {
           Serial.println("connected");
-          publisher.publish("Hello!");
+          publisher.publish_stream("continous", "Hello!");
           Serial.println("Hello!");
         } else Serial.println(publisher.getClientState());
       });
