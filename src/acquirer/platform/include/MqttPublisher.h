@@ -1,14 +1,11 @@
 #ifndef MQTTPUBLISHER_H
 #define MQTTPUBLISHER_H
 
-#define CONTINOUS_STREAM "/stream:continous"
-#define PERIODIC_STREAM "/stream:periodic"
-#define AVERAGE_STREAM "/stream:average"
 
 #include <string>
 #include <list>
 #include <PubSubClient.h>
-
+#include <data_stream.h>
 
 struct MqttConfiguration
 {
@@ -33,10 +30,10 @@ public:
     bool connected();
     int getClientState();
 
-    void addStream(const char*);
-    void removeStream(const char*);
+    void addStream(data_stream);
+    void removeStream(data_stream);
 
-private:
+protected:
     
     char* client_id = NULL;
     char* host = NULL;
@@ -44,7 +41,8 @@ private:
     char* topic = NULL;
     PubSubClient* pubSubClient;
 
-    std::list<const char*> streamList;   
+    continous_stream c_stream;
+    std::list<data_stream> streamList;   
 
     
 };

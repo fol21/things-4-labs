@@ -7,7 +7,9 @@ MqttPublisher::MqttPublisher(Client& client, MqttConfiguration& config)
     this->host = config.host;
     this->port = config.port;
     this->topic = config.topic;
-    this->pubSubClient = new PubSubClient(client); 
+    this->pubSubClient = new PubSubClient(client);
+
+    this->c_stream = continous_stream(); 
 }
 
 MqttPublisher::MqttPublisher(Client& client,  char* client_id, char* host, 
@@ -20,14 +22,14 @@ MqttPublisher::MqttPublisher(Client& client,  char* client_id, char* host,
     this->pubSubClient = new PubSubClient(client); 
 }
 
-void MqttPublisher::addStream(const char* streamName)
+void MqttPublisher::addStream(data_stream stream)
 {
-    this->streamList.push_back(streamName);
+    this->streamList.push_back(stream);
 }
 
-void MqttPublisher::removeStream(const char* streamName)
+void MqttPublisher::removeStream(data_stream streamName)
 {
-    this->streamList.remove(streamName);
+    if(!this->streamList.empty()) this->streamList.remove(streamName);
 }
 
 
@@ -68,10 +70,10 @@ bool MqttPublisher::reconnect(void(*handler)(bool))
 
     if(this->streamList.empty())
     {
-        for (std::list<const char*>::iterator it=this->streamList.begin(); 
+        for (std::list<data_stream>::iterator it=this->streamList.begin(); 
                 it!=this->streamList.end(); ++it)
         {
-            this->pubSubClient->subscribe(*it);
+            this->pubSubClient->subscribe((*it).Name());
         }
     }
 
