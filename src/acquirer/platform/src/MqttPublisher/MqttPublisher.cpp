@@ -28,9 +28,9 @@ void MqttPublisher::add_stream(data_stream stream)
     this->streamList.push_back(stream);
 }
 
-void MqttPublisher::remove_stream(data_stream streamName)
+void MqttPublisher::remove_stream(const char* stream_name)
 {
-    if(!this->streamList.empty()) this->streamList.remove(streamName);
+    if(!this->streamList.empty()) this->streamList.remove_if(is_name(stream_name));
 }
 
 
@@ -67,7 +67,6 @@ String MqttPublisher::publish_stream(const char* stream_name, const char* messag
         {
             std::list<data_stream>::iterator it_found = std::find_if(
                 this->streamList.begin(), this->streamList.end(), is_name(stream_name));
-                
             pubSubClient->publish(this->topic, (*it_found).send(message));
         }        
 

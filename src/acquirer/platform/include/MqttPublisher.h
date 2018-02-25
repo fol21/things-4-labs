@@ -35,7 +35,7 @@ public:
     int getClientState();
 
     void add_stream(data_stream);
-    void remove_stream(data_stream);
+    void remove_stream(const char*);
 
 protected:
     
