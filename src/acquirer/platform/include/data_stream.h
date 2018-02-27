@@ -1,7 +1,9 @@
 #ifndef DATA_STREAM_H
 #define DATA_STREAM_H
 
+#include <Arduino.h>
 #include <string.h>
+
 
 #define ARRAY_SIZE(x)  (sizeof(x) / sizeof((x)[0])) 
 #define CONTINOUS_STREAM "continous"
@@ -43,23 +45,40 @@ class continous_stream : public data_stream
         continous_stream() : data_stream(CONTINOUS_STREAM){};
         continous_stream(int size) : data_stream(CONTINOUS_STREAM, size){};
 
-        void Process(){};
+        void Process();
 
         const char* send(const char*); // send message after process is done
 
 };
 
-// class periodic_stream : protected data_stream
-// {
-//     public:
-//         periodic_stream() : data_stream(PERIODIC_STREAM){};
-//         periodic_stream(int size) : data_stream(PERIODIC_STREAM, size){};
+class periodic_stream : public data_stream
+{
+    public:
+        periodic_stream() : data_stream(PERIODIC_STREAM){};
+        periodic_stream(int size) : data_stream(PERIODIC_STREAM, size){};
 
-//         int Threshold();
+        void Process();
 
-//         char* send(char*); // send message after process is done
+        const char* send(const char*, int); // send message after process is done
 
-// };
+    private:
+    int millis;
+};
+
+class average_stream : public data_stream
+{
+    public:
+        average_stream() : data_stream(AVERAGE_STREAM){};
+        average_stream(int size) : data_stream(AVERAGE_STREAM, size){};
+
+        void Process();
+
+        const char* send(double* samples); // send message after process is done
+
+    private:
+        double* samples;
+        double buffer;
+};
 
 #endif // DATA_STREAM_H
 

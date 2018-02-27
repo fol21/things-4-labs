@@ -23,7 +23,9 @@ void data_stream::Process(void (*process)(void))
 
 const char* data_stream::send(const char* message)
 {
-    this->process();
+    if(this->process != NULL) 
+        this->process(); //Normal registered process
+
     if(this->threshold != 0)
     {
         if(ARRAY_SIZE(message) > this->threshold) return "Message size is above allowed !";
@@ -34,6 +36,8 @@ const char* data_stream::send(const char* message)
 
 //Continous Stream
 
+void continous_stream::Process(){}
+
 const char* continous_stream::send(const char* message)
 {
   return data_stream::send(message);  
@@ -41,3 +45,39 @@ const char* continous_stream::send(const char* message)
 
 //Periodic Stream
 
+void periodic_stream::Process()
+{
+    delay(this->millis);
+}
+
+const char* periodic_stream::send(const char* message, int millis)
+{
+  this->millis = millis;
+  this->Process();
+  return data_stream::send(message);  
+}
+
+//Average Stream
+
+void average_stream::Process()
+{
+    this->buffer = 0;
+    for(int i=0; i < ARRAY_SIZE(this->samples); i++){
+        this->buffer += samples[i];
+    }
+    this->buffer = this->buffer/ARRAY_SIZE(this->samples);
+}
+
+const char* average_stream::send(double* samples)
+{
+    this->samples = samples;
+    this->Process();
+    
+    char m[100];
+    sprintf(m,"%f",this->buffer);
+        
+    this->buffer = 0;
+    return data_stream::send(m);
+    
+    this->Process();
+}
