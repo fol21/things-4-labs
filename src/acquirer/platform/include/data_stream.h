@@ -7,7 +7,6 @@
 
 #define ARRAY_SIZE(x)  (sizeof(x) / sizeof((x)[0])) 
 #define CONTINOUS_STREAM "continous"
-#define AVERAGE_STREAM "average"
 #define PERIODIC_STREAM "periodic"
 
 class data_stream
@@ -63,21 +62,6 @@ class periodic_stream : public data_stream
 
     private:
     int millis;
-};
-
-class average_stream : public data_stream
-{
-    public:
-        average_stream() : data_stream(AVERAGE_STREAM){};
-        average_stream(int size) : data_stream(AVERAGE_STREAM, size){};
-
-        void Process();
-
-        const char* send(double* samples); // send message after process is done
-
-    private:
-        double* samples;
-        double buffer;
 };
 
 #endif // DATA_STREAM_H

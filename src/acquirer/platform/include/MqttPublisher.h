@@ -28,7 +28,9 @@ public:
     MqttPublisher(Client&, MqttConfiguration& config);
     MqttPublisher(Client&, char*, char*, unsigned int, char*);
     String publish_stream(const char*, const char*);
+    String publish_stream(const char*, const char*, int);
     String publish_stream(const char*, const char*, const char*);
+    String publish_stream(const char*, const char*, const char*, int);
     void init(void (*)(void));
     bool reconnect(void(*handler)(bool));
     bool connected();
@@ -46,6 +48,8 @@ protected:
     PubSubClient* pubSubClient;
 
     continous_stream c_stream;
+    periodic_stream p_stream;
+
     std::list<data_stream> streamList;   
 
     
