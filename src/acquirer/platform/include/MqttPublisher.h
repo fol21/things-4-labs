@@ -21,20 +21,24 @@ struct MqttConfiguration
     char* topic;
 };
 
+enum publisher_state {INIT, NETWORK, BROKER, READY};
+
 class MqttPublisher
 {
 public:
 
     MqttPublisher(Client&, MqttConfiguration& config);
-    MqttPublisher(Client&, char*, char*, unsigned int, char*);
-    String publish_stream(const char*, const char*);
-    String publish_stream(const char*, const char*, int);
-    String publish_stream(const char*, const char*, const char*);
-    String publish_stream(const char*, const char*, const char*, int);
-    void init(void (*)(void));
-    bool reconnect(void(*handler)(bool));
-    bool connected();
-    int getClientState();
+    MqttPublisher(Client&, char*, char*, unsigned int);
+    const char* publish_stream(const char*, const char*, const char*);
+    const char* publish_stream(const char*, const char*, const char*, int);
+    const char* publish_stream(const char*, const char*, const char*, const char*);
+    const char* publish_stream(const char*, const char*, const char*, const char*, int);
+    void check_network(bool(*)(void));
+    void init_network(bool (*)(void));
+    bool reconnect(void(*handler)(void));
+    bool broker_connected();
+    int Client_state();
+    int Publisher_state();
 
     void add_stream(data_stream);
     void remove_stream(const char*);
@@ -47,11 +51,14 @@ protected:
     char* topic = NULL;
     PubSubClient* pubSubClient;
 
+    bool (*has_network)(void);
+    bool (*network_start)(void);
+
     continous_stream c_stream;
     periodic_stream p_stream;
-
     std::list<data_stream> streamList;   
-
+    
+    publisher_state state = INIT;
     
 };
 

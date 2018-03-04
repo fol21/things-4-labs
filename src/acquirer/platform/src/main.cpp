@@ -6,12 +6,32 @@ struct MqttConfiguration config = {"FOL", "21061992", "ESP8266-test", "192.168.1
 WiFiClient espClient;
 MqttPublisher publisher = MqttPublisher(espClient, config);
 
+
+void callback(char* topic, byte* payload, unsigned int length) {
+  Serial.print("Message arrived [");
+  Serial.print(topic);
+  Serial.print("] ");
+  Serial.println((char*) payload);
+}
+
+
+
 void setup()
 {
   Serial.begin(115200);
   delay(3000);
-  publisher.init(
-    [=]()
+
+  publisher.check_network(
+    [=]() -> bool
+    {
+      if(WiFi.status() == WL_CONNECTED)
+        return true;
+      else 
+        return false;
+  });
+  
+  publisher.init_network(
+    [=]() -> bool
     {
       delay(10);
       // We start by connecting to a WiFi network
@@ -25,25 +45,20 @@ void setup()
         delay(500);
         Serial.print(".");
       }
-    });
+      Serial.println("");
+      Serial.println("[Network] : Connected");
+      return true;
+  });
 }
 
 void loop()
 {
-  while(!publisher.connected())
-  {
-    publisher.reconnect(
-      [=](bool result)
+   publisher.reconnect(
+      [=]()
       {
-        if(result)
-        {
-          Serial.println("connected");
-          publisher.publish_stream("continous", "Hello!");
-          Serial.println("Hello!");
-        } else Serial.println(publisher.getClientState());
+        Serial.println(publisher.Publisher_state());
       });
-  }
-
+   publisher.publish_stream("/test", PERIODIC_STREAM,"data", 2000);
 }
 
 
