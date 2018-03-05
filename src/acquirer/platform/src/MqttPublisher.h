@@ -18,7 +18,6 @@ struct MqttConfiguration
     char* client_id;
     char* host;
     unsigned int port;
-    char* topic;
 };
 
 enum publisher_state {INIT, NETWORK, BROKER, READY};
@@ -29,10 +28,7 @@ public:
 
     MqttPublisher(Client&, MqttConfiguration& config);
     MqttPublisher(Client&, char*, char*, unsigned int);
-    const char* publish_stream(const char*, const char*, const char*);
-    const char* publish_stream(const char*, const char*, const char*, int);
-    const char* publish_stream(const char*, const char*, const char*, const char*);
-    const char* publish_stream(const char*, const char*, const char*, const char*, int);
+    const char* publish_stream(const char*, const char*, const char*, JsonObject& json);
     void check_network(bool(*)(void));
     void init_network(bool (*)(void));
     bool reconnect(void(*handler)(void));
@@ -40,8 +36,12 @@ public:
     int Client_state();
     int Publisher_state();
 
-    void add_stream(data_stream);
+    void onMessage(MQTT_CALLBACK_SIGNATURE);
+
+    void add_stream(data_stream*);
     void remove_stream(const char*);
+
+    PubSubClient* PubSub_Client(){return pubSubClient;}
 
 protected:
     
@@ -49,6 +49,7 @@ protected:
     char* host = NULL;
     unsigned int port = 0; 
     char* topic = NULL;
+    PubSubClient  PS_Client;
     PubSubClient* pubSubClient;
 
     bool (*has_network)(void);
@@ -56,7 +57,7 @@ protected:
 
     continous_stream c_stream;
     periodic_stream p_stream;
-    std::list<data_stream> streamList;   
+    std::list<data_stream*> streamList;   
     
     publisher_state state = INIT;
     
@@ -66,9 +67,9 @@ struct is_name
 {
         is_name(const char*& a_wanted) : wanted(a_wanted) {}
         const char* wanted;
-        bool operator()(data_stream& stream)
+        bool operator()(data_stream*& stream)
         {
-            return strcmp(wanted, stream.Name()) == 0;
+            return strcmp(wanted, stream->Name()) == 0;
         }
 };
 

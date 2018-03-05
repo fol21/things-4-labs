@@ -2,10 +2,12 @@
 
 #include <MqttPublisher.h>
 
-struct MqttConfiguration config = {"FOL", "21061992", "ESP8266-test", "192.168.15.5", 1883, "/test"};
+struct MqttConfiguration config = {"FOL", "21061992", "ESP8266-test", "192.168.15.5", 1883};
 WiFiClient espClient;
 MqttPublisher publisher = MqttPublisher(espClient, config);
 
+StaticJsonBuffer<200> jsonBuffer;
+JsonObject& object1 = jsonBuffer.createObject();
 
 void callback(char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
@@ -20,6 +22,9 @@ void setup()
 {
   Serial.begin(115200);
   delay(3000);
+  object1["millis"] = 1000;
+
+  publisher.onMessage(callback);
 
   publisher.check_network(
     [=]() -> bool
@@ -53,12 +58,13 @@ void setup()
 
 void loop()
 {
+   
    publisher.reconnect(
       [=]()
       {
         Serial.println(publisher.Publisher_state());
       });
-   publisher.publish_stream("/test", PERIODIC_STREAM,"data", 2000);
+   publisher.publish_stream("/test", PERIODIC_STREAM,"data", object1);
 }
 
 
