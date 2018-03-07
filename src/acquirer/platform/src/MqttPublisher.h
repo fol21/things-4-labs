@@ -3,6 +3,7 @@
 
 #define DEVICE_ID_PATTERN "/id:"
 #define STREAM_PATTERN "/stream:"
+#define STREAM_PATTERN_STRING String("/stream:")
 
 
 #include <string>
@@ -10,6 +11,7 @@
 #include <algorithm>
 #include <PubSubClient.h>
 #include <data_stream.h>
+
 
 struct MqttConfiguration
 {
@@ -49,7 +51,6 @@ protected:
     char* host = NULL;
     unsigned int port = 0; 
     char* topic = NULL;
-    PubSubClient  PS_Client;
     PubSubClient* pubSubClient;
 
     bool (*has_network)(void);
@@ -63,14 +64,6 @@ protected:
     
 };
 
-struct is_name
-{
-        is_name(const char*& a_wanted) : wanted(a_wanted) {}
-        const char* wanted;
-        bool operator()(data_stream*& stream)
-        {
-            return strcmp(wanted, stream->Name()) == 0;
-        }
-};
+
 
 #endif // !MQTTPUBLISHER_H

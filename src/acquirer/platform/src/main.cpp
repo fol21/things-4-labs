@@ -1,15 +1,14 @@
 #include <ESP8266WiFi.h>
-
 #include <MqttPublisher.h>
 
 struct MqttConfiguration config = {"FOL", "21061992", "ESP8266-test", "192.168.15.5", 1883};
 WiFiClient espClient;
 MqttPublisher publisher = MqttPublisher(espClient, config);
 
-StaticJsonBuffer<200> jsonBuffer;
+StaticJsonBuffer<500> jsonBuffer;
 JsonObject& object1 = jsonBuffer.createObject();
 
-void callback(char* topic, byte* payload, unsigned int length) {
+void callback( char* topic, byte* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");

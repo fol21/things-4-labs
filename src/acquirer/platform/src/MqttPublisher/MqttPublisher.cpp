@@ -1,5 +1,20 @@
 #include <MqttPublisher.h>
 
+struct is_name
+{
+        is_name(const char*& a_wanted) : wanted(a_wanted) {}
+        const char* wanted;
+        bool operator()(data_stream*& stream)
+        {
+            return strcmp(wanted, stream->Name()) == 0;
+        }
+};
+
+const char* StringToCharArray(String str)
+{
+    return str.c_str();
+}
+
 
 MqttPublisher::MqttPublisher(Client& client, MqttConfiguration& config)
 {
@@ -81,10 +96,13 @@ bool MqttPublisher::reconnect(void(*handler)(void))
         {
             Serial.println("[STREAMS AVAIABLE]");
             Serial.print("Continous Stream: ");
-            Serial.println(this->pubSubClient->subscribe(strcat(STREAM_PATTERN, CONTINOUS_STREAM)));
+            Serial.println(StringToCharArray(STREAM_PATTERN_STRING + CONTINOUS_STREAM_STRING));
+            Serial.println(this->pubSubClient->subscribe(StringToCharArray(STREAM_PATTERN_STRING + 
+                                CONTINOUS_STREAM_STRING)));
             Serial.print("Periodic Stream: ");
-            Serial.println(this->pubSubClient->subscribe(strcat(STREAM_PATTERN, PERIODIC_STREAM)));
-            this->pubSubClient->subscribe("/subscribe_test");
+            Serial.println(StringToCharArray(STREAM_PATTERN_STRING + PERIODIC_STREAM_STRING));
+            Serial.println(this->pubSubClient->subscribe(StringToCharArray(STREAM_PATTERN_STRING + 
+                                PERIODIC_STREAM_STRING)));
 
             if(!this->streamList.empty())
             {
@@ -92,6 +110,7 @@ bool MqttPublisher::reconnect(void(*handler)(void))
                         it!=this->streamList.end(); ++it)
                 {
                     this->pubSubClient->subscribe(strcat(STREAM_PATTERN, (*it)->Name()));
+                    
                 }
             }
             
@@ -138,5 +157,3 @@ int MqttPublisher::Publisher_state()
 {
     return this->state;
 }
-
-

@@ -5,11 +5,13 @@
 #include <string.h>
 #include <ArduinoJson.h>
 
-
-
 #define ARRAY_SIZE(x)  (sizeof(x) / sizeof((x)[0])) 
+
 #define CONTINOUS_STREAM "continous"
 #define PERIODIC_STREAM "periodic"
+#define CONTINOUS_STREAM_STRING String("continous")
+#define PERIODIC_STREAM_STRING String("periodic")
+
 
 class data_stream
 {
@@ -18,8 +20,11 @@ public:
     int Threshold(){ return this->threshold; }
     char* Name(){ return this ->name; };
 
+
     //overridable stream process
     virtual void process(JsonObject&) = 0;
+
+    virtual void onMessage(const char*, uint8_t, unsigned int) = 0;
 
     const char* send(const char*, JsonObject&); // send message after process is done
 
@@ -48,6 +53,8 @@ class continous_stream : public data_stream
         };
 
         void process(JsonObject& json){};
+
+        void onMessage(const char*, uint8_t,unsigned int){};
 };
 
 class periodic_stream : public data_stream
@@ -62,6 +69,8 @@ class periodic_stream : public data_stream
             this->name = PERIODIC_STREAM;
             this->threshold = size;
         }
+
+        void onMessage(const char*, uint8_t,unsigned int){};
 
         void process(JsonObject& json)
         {
