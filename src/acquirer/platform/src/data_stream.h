@@ -22,11 +22,11 @@ public:
 
 
     //overridable stream process
-    virtual void process(JsonObject&) = 0;
+    virtual void process() = 0;
 
-    virtual void onMessage(const char*, uint8_t, unsigned int) = 0;
+    virtual void onMessage(char*, const char*, unsigned int) = 0;
 
-    const char* send(const char*, JsonObject&); // send message after process is done
+    const char* send(const char*); // send message after process is done
 
     bool operator==(const data_stream& o )
     {
@@ -37,6 +37,7 @@ protected:
     
     char* name;
     int  threshold = 0;
+    char* payload;
 };
 
 class continous_stream : public data_stream
@@ -52,9 +53,9 @@ class continous_stream : public data_stream
             this->threshold = size;
         };
 
-        void process(JsonObject& json){};
+        void process(){};
 
-        void onMessage(const char*, uint8_t,unsigned int){};
+        void onMessage(char* topic, const char* payload,unsigned int length){};
 };
 
 class periodic_stream : public data_stream
@@ -63,18 +64,24 @@ class periodic_stream : public data_stream
         periodic_stream()
         {
             this->name = PERIODIC_STREAM;
-        };
+        }
         periodic_stream(int size)
         {
             this->name = PERIODIC_STREAM;
             this->threshold = size;
         }
 
-        void onMessage(const char*, uint8_t,unsigned int){};
-
-        void process(JsonObject& json)
+        void onMessage(char* topic, const char* payload,unsigned int length)
         {
-            delay(json["millis"]);
+            this->payload = (char*) payload;
+        }
+
+        void process()
+        {
+
+            StaticJsonBuffer<200> jsonBuffer;
+            JsonObject& params = jsonBuffer.parseObject(this->payload);
+            delay(params["millis"]);
         }
 };
 

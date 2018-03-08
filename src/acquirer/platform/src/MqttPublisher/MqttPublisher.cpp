@@ -43,8 +43,28 @@ MqttPublisher::MqttPublisher(Client& client,  char* client_id, char* host,
 
 void MqttPublisher::onMessage(MQTT_CALLBACK_SIGNATURE)
 {
+    //this->message_callback = callback;
     this->pubSubClient->setCallback(callback);
 }
+
+// void MqttPublisher::onMessage(void (*callback)(char*, uint8_t*, unsigned int))
+// {
+//     this->message_callback = callback;
+//     this->pubSubClient->setCallback(this->middlewares);
+// }
+
+// void MqttPublisher::middlewares(char* topic, uint8_t* payload, unsigned int length)
+// {
+//     if(topic == (STREAM_PATTERN_STRING+CONTINOUS_STREAM_STRING).c_str())
+//         this->c_stream.onMessage(topic, payload, length);
+//     else if(topic == (STREAM_PATTERN_STRING+PERIODIC_STREAM_STRING).c_str())
+//         this->c_stream.onMessage(topic, payload, length);
+//     else 
+//     {
+//         String str_topic = String(topic);
+//         *(this->find_stream(str_topic.substring(str_topic.indexOf(':')+1))).onMessage(topic,payload)
+//     } 
+// }
 
 void MqttPublisher::add_stream(data_stream* stream)
 {
@@ -56,17 +76,30 @@ void MqttPublisher::remove_stream(const char* stream_name)
     if(!this->streamList.empty()) this->streamList.remove_if(is_name(stream_name));
 }
 
-const char* MqttPublisher::publish_stream(const char* topic, const char* stream_name, const char* message, JsonObject& json)
+data_stream* MqttPublisher::find_stream(const char* stream_name)
+{
+    if(stream_name == CONTINOUS_STREAM)
+        return &(this->c_stream);
+    else if(stream_name == PERIODIC_STREAM)
+        return &(this->p_stream);
+    if(!this->streamList.empty()) 
+        return *(std::find_if(this->streamList.begin(), this->streamList.end(), is_name(stream_name)));
+    else 
+        return NULL;
+}
+
+const char* MqttPublisher::publish_stream(const char* topic, const char* stream_name, const char* message)
 {
     if(this->state == READY) 
     {
          if(strcmp(stream_name,CONTINOUS_STREAM) == 0)
-            pubSubClient->publish(topic, this->c_stream.send(message, json));
+            this->pubSubClient->publish(topic, this->c_stream.send(message));
          else if(strcmp(stream_name,PERIODIC_STREAM) == 0)
-            pubSubClient->publish(topic, this->p_stream.send(message, json));
-         //TODO implement logic to find a stream in stream list   
+            this->pubSubClient->publish(topic, this->p_stream.send(message));
+        //  else
+        //     this->pubSubClient->publish(topic, *(this->find_stream(stream_name))->send(message));   
 
-        return message;
+         return message;
     }
     else return "" + pubSubClient->state();
 }

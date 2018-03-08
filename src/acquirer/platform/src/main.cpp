@@ -24,6 +24,7 @@ void setup()
   object1["millis"] = 1000;
 
   publisher.onMessage(callback);
+  publisher.find_stream(PERIODIC_STREAM)->onMessage("","{\"millis\":1000}",1000);
 
   publisher.check_network(
     [=]() -> bool
@@ -63,7 +64,7 @@ void loop()
       {
         Serial.println(publisher.Publisher_state());
       });
-   publisher.publish_stream("/test", PERIODIC_STREAM,"data", object1);
+   publisher.publish_stream("/test", PERIODIC_STREAM,"data");
 }
 
 

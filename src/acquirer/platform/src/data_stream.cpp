@@ -1,9 +1,9 @@
 #include <data_stream.h>
 
 
-const char* data_stream::send(const char* message, JsonObject& json)
+const char* data_stream::send(const char* message)
 {
-   this->process(json);
+   this->process();
 
     if(this->threshold != 0)
     {

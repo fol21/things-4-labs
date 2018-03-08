@@ -9,6 +9,7 @@
 #include <string>
 #include <list>
 #include <algorithm>
+
 #include <PubSubClient.h>
 #include <data_stream.h>
 
@@ -30,7 +31,7 @@ public:
 
     MqttPublisher(Client&, MqttConfiguration& config);
     MqttPublisher(Client&, char*, char*, unsigned int);
-    const char* publish_stream(const char*, const char*, const char*, JsonObject& json);
+    const char* publish_stream(const char*, const char*, const char*);
     void check_network(bool(*)(void));
     void init_network(bool (*)(void));
     bool reconnect(void(*handler)(void));
@@ -42,6 +43,7 @@ public:
 
     void add_stream(data_stream*);
     void remove_stream(const char*);
+    data_stream* find_stream(const char*);
 
     PubSubClient* PubSub_Client(){return pubSubClient;}
 
@@ -50,8 +52,11 @@ protected:
     char* client_id = NULL;
     char* host = NULL;
     unsigned int port = 0; 
-    char* topic = NULL;
     PubSubClient* pubSubClient;
+
+    void(*message_callback)(char*, uint8_t*, unsigned int);
+
+    static void middlewares(char*, uint8_t*, unsigned int);
 
     bool (*has_network)(void);
     bool (*network_start)(void);
