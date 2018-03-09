@@ -39,7 +39,7 @@ public:
     int Client_state();
     int Publisher_state();
 
-    void onMessage(MQTT_CALLBACK_SIGNATURE);
+    void onMessage(void(*)(char*, uint8_t*, unsigned int));
 
     void add_stream(data_stream*);
     void remove_stream(const char*);
@@ -56,7 +56,7 @@ protected:
 
     void(*message_callback)(char*, uint8_t*, unsigned int);
 
-    static void middlewares(char*, uint8_t*, unsigned int);
+    void middlewares(char*, uint8_t*, unsigned int);
 
     bool (*has_network)(void);
     bool (*network_start)(void);

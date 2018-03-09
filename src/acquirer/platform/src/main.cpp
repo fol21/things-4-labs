@@ -2,6 +2,7 @@
 #include <MqttPublisher.h>
 
 struct MqttConfiguration config = {"FOL", "21061992", "ESP8266-test", "192.168.15.5", 1883};
+
 WiFiClient espClient;
 MqttPublisher publisher = MqttPublisher(espClient, config);
 
@@ -13,18 +14,18 @@ void callback( char* topic, byte* payload, unsigned int length) {
   Serial.print(topic);
   Serial.print("] ");
   Serial.println((char*) payload);
+  if(topic == PERIODIC_STREAM)
+    publisher.find_stream(PERIODIC_STREAM)->onMessage("",(const char*)payload,1000);
+
 }
-
-
 
 void setup()
 {
   Serial.begin(115200);
   delay(3000);
   object1["millis"] = 1000;
-
   publisher.onMessage(callback);
-  publisher.find_stream(PERIODIC_STREAM)->onMessage("","{\"millis\":1000}",1000);
+  // publisher.find_stream(PERIODIC_STREAM)->onMessage("","{\"millis\":1000}",1000);
 
   publisher.check_network(
     [=]() -> bool
