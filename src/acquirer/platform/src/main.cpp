@@ -1,29 +1,22 @@
 #include <ESP8266WiFi.h>
 #include <MqttPublisher.h>
 
-struct MqttConfiguration config = {"FOL", "21061992", "ESP8266-test", "192.168.15.5", 1883};
 
 WiFiClient espClient;
+struct MqttConfiguration config = {"FOL", "21061992", "ESP8266-test", "192.168.15.4", 1883};
 MqttPublisher publisher = MqttPublisher(espClient, config);
 
-StaticJsonBuffer<500> jsonBuffer;
-JsonObject& object1 = jsonBuffer.createObject();
-
-void callback( char* topic, byte* payload, unsigned int length) {
+void callback( char* topic, uint8_t* payload, unsigned int length) {
   Serial.print("Message arrived [");
   Serial.print(topic);
   Serial.print("] ");
   Serial.println((char*) payload);
-  if(topic == PERIODIC_STREAM)
-    publisher.find_stream(PERIODIC_STREAM)->onMessage("",(const char*)payload,1000);
-
 }
 
 void setup()
 {
   Serial.begin(115200);
   delay(3000);
-  object1["millis"] = 1000;
   publisher.onMessage(callback);
   // publisher.find_stream(PERIODIC_STREAM)->onMessage("","{\"millis\":1000}",1000);
 
@@ -63,7 +56,7 @@ void loop()
    publisher.reconnect(
       [=]()
       {
-        Serial.println(publisher.Publisher_state());
+        Serial.println("Publisher state: " + String(publisher.Publisher_state()));
       });
    publisher.publish_stream("/test", PERIODIC_STREAM,"data");
 }

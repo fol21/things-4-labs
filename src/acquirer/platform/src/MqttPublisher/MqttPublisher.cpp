@@ -28,7 +28,7 @@ MqttPublisher::MqttPublisher(Client& client, MqttConfiguration& config)
     this->p_stream = periodic_stream();
 }
 
-MqttPublisher::MqttPublisher(Client& client,  char* client_id, char* host, 
+MqttPublisher::MqttPublisher(Client& client,  const char* client_id, const char* host, 
                                 unsigned int port)
 {
     this->client_id = client_id;
@@ -59,18 +59,25 @@ void MqttPublisher::onMessage(void (*callback)(char*, uint8_t*, unsigned int))
 
 void MqttPublisher::middlewares(char* topic, uint8_t* payload, unsigned int length)
 {
-    if(topic == (STREAM_PATTERN_STRING+CONTINOUS_STREAM_STRING).c_str())
-        this->c_stream.onMessage(topic, (const char*) payload, length);
-    else if(topic == (STREAM_PATTERN_STRING+PERIODIC_STREAM_STRING).c_str())
-        this->c_stream.onMessage(topic, (const char*) payload, length);
+    this->message_callback(topic, payload, length);
+    if(strcmp(topic, (STREAM_PATTERN_STRING+CONTINOUS_STREAM_STRING).c_str()) == 0)
+        {
+            
+            this->c_stream.onMessage(topic, (const char*) payload, length);
+        }
+    else if(strcmp(topic, "/stream:periodic") == 0)
+        {
+            Serial.println("Updating " + CONTINOUS_STREAM_STRING + " params");
+            this->p_stream.onMessage(topic, (const char*) payload, length);
+        }
     else 
     {
         String str_topic = String(topic);
         const char* c = str_topic.substring(str_topic.indexOf(':')+1).c_str();
+        Serial.println("Updating " + String(c) + " params");
         this->find_stream(c)->onMessage(topic, (const char*) payload, length);
     } 
 
-    this->message_callback(topic, payload, length);
 }
 
 void MqttPublisher::add_stream(data_stream* stream)

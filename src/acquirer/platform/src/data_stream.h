@@ -73,16 +73,20 @@ class periodic_stream : public data_stream
 
         void onMessage(char* topic, const char* payload,unsigned int length)
         {
+            Serial.println("New params: " + String(payload));
+            StaticJsonBuffer<200> jsonBuffer;
             this->payload = (char*) payload;
+            JsonObject& params = jsonBuffer.parseObject(this->payload);
+            this->millis = params["millis"];
         }
 
         void process()
         {
-
-            StaticJsonBuffer<200> jsonBuffer;
-            JsonObject& params = jsonBuffer.parseObject(this->payload);
-            delay(params["millis"]);
+            delay(this->millis);
         }
+    protected:
+        int millis = 0;
+
 };
 
 #endif // DATA_STREAM_H

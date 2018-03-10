@@ -3,7 +3,8 @@
 
 const char* data_stream::send(const char* message)
 {
-   this->process();
+   if(payload != NULL)
+    this->process();
 
     if(this->threshold != 0)
     {

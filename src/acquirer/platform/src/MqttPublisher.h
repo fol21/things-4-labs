@@ -16,10 +16,10 @@
 
 struct MqttConfiguration
 {
-    char* ssid;
-    char* password;
-    char* client_id;
-    char* host;
+    const char* ssid;
+    const char* password;
+    const char* client_id;
+    const char* host;
     unsigned int port;
 };
 
@@ -30,7 +30,7 @@ class MqttPublisher
 public:
 
     MqttPublisher(Client&, MqttConfiguration& config);
-    MqttPublisher(Client&, char*, char*, unsigned int);
+    MqttPublisher(Client&, const char*, const char*, unsigned int);
     const char* publish_stream(const char*, const char*, const char*);
     void check_network(bool(*)(void));
     void init_network(bool (*)(void));
@@ -49,8 +49,8 @@ public:
 
 protected:
     
-    char* client_id = NULL;
-    char* host = NULL;
+    const char* client_id;
+    const char* host = NULL;
     unsigned int port = 0; 
     PubSubClient* pubSubClient;
 
