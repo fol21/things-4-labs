@@ -37,7 +37,7 @@ protected:
     
     char* name;
     int  threshold = 0;
-    char* payload;
+    char* payload = NULL;
 };
 
 class continous_stream : public data_stream
@@ -73,7 +73,6 @@ class periodic_stream : public data_stream
 
         void onMessage(char* topic, const char* payload,unsigned int length)
         {
-            Serial.println("New params: " + String(payload));
             StaticJsonBuffer<200> jsonBuffer;
             this->payload = (char*) payload;
             JsonObject& params = jsonBuffer.parseObject(this->payload);

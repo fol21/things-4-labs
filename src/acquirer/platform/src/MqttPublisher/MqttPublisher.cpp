@@ -59,24 +59,24 @@ void MqttPublisher::onMessage(void (*callback)(char*, uint8_t*, unsigned int))
 
 void MqttPublisher::middlewares(char* topic, uint8_t* payload, unsigned int length)
 {
-    this->message_callback(topic, payload, length);
     if(strcmp(topic, (STREAM_PATTERN_STRING+CONTINOUS_STREAM_STRING).c_str()) == 0)
-        {
-            
+        {            
             this->c_stream.onMessage(topic, (const char*) payload, length);
         }
-    else if(strcmp(topic, "/stream:periodic") == 0)
+    else if(strcmp(topic, (STREAM_PATTERN_STRING+PERIODIC_STREAM_STRING).c_str()) == 0)
         {
-            Serial.println("Updating " + CONTINOUS_STREAM_STRING + " params");
             this->p_stream.onMessage(topic, (const char*) payload, length);
         }
     else 
     {
         String str_topic = String(topic);
-        const char* c = str_topic.substring(str_topic.indexOf(':')+1).c_str();
-        Serial.println("Updating " + String(c) + " params");
+        int index = str_topic.indexOf(":") + 1;
+        String s = str_topic.substring(index);
+        const char* c = s.c_str();
         this->find_stream(c)->onMessage(topic, (const char*) payload, length);
     } 
+    
+    this->message_callback(topic, payload, length);
 
 }
 
@@ -96,8 +96,10 @@ data_stream* MqttPublisher::find_stream(const char* stream_name)
         return &(this->c_stream);
     else if(stream_name == PERIODIC_STREAM)
         return &(this->p_stream);
-    if(!this->streamList.empty()) 
+    if(!this->streamList.empty())
+    {   
         return *(std::find_if(this->streamList.begin(), this->streamList.end(), is_name(stream_name)));
+    }
     else 
         return &(this->c_stream);
 }
@@ -113,7 +115,7 @@ const char* MqttPublisher::publish_stream(const char* topic, const char* stream_
          else if(strcmp(stream_name,PERIODIC_STREAM) == 0)
             this->pubSubClient->publish(topic, this->p_stream.send(message));
          else
-            this->pubSubClient->publish(topic, (char*) *(this->find_stream(stream_name))->send(message));   
+            this->pubSubClient->publish(topic, (char*) this->find_stream(stream_name)->send(message));   
          
          return message;
     }
@@ -143,23 +145,17 @@ bool MqttPublisher::reconnect(void(*handler)(void))
     {
         if(this->pubSubClient->connect(this->client_id))
         {
-            Serial.println("[STREAMS AVAIABLE]");
-            Serial.print("Continous Stream: ");
-            Serial.println(StringToCharArray(STREAM_PATTERN_STRING + CONTINOUS_STREAM_STRING));
-            Serial.println(this->pubSubClient->subscribe(StringToCharArray(STREAM_PATTERN_STRING + 
-                                CONTINOUS_STREAM_STRING)));
-            Serial.print("Periodic Stream: ");
-            Serial.println(StringToCharArray(STREAM_PATTERN_STRING + PERIODIC_STREAM_STRING));
-            Serial.println(this->pubSubClient->subscribe(StringToCharArray(STREAM_PATTERN_STRING + 
-                                PERIODIC_STREAM_STRING)));
+            this->pubSubClient->subscribe(StringToCharArray(STREAM_PATTERN_STRING + 
+                                CONTINOUS_STREAM_STRING));
+            this->pubSubClient->subscribe(StringToCharArray(STREAM_PATTERN_STRING + 
+                                PERIODIC_STREAM_STRING));
 
             if(!this->streamList.empty())
             {
                 for (std::list<data_stream*>::iterator it=this->streamList.begin(); 
                         it!=this->streamList.end(); ++it)
                 {
-                    this->pubSubClient->subscribe(strcat(STREAM_PATTERN, (*it)->Name()));
-                    
+                    this->pubSubClient->subscribe((STREAM_PATTERN_STRING + String((*it)->Name())).c_str()); 
                 }
             }
             

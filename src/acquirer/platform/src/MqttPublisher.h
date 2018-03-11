@@ -2,6 +2,7 @@
 #define MQTTPUBLISHER_H
 
 #define DEVICE_ID_PATTERN "/id:"
+#define DEVICE_ID_PATTERN "/id:"
 #define STREAM_PATTERN "/stream:"
 #define STREAM_PATTERN_STRING String("/stream:")
 

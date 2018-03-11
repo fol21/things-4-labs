@@ -13,12 +13,42 @@ void callback( char* topic, uint8_t* payload, unsigned int length) {
   Serial.println((char*) payload);
 }
 
+class const_stream : public data_stream
+{
+  public:
+    const char* constant = "";
+    const_stream(const char* consta)
+    {
+      this->name = "constant";
+      this->payload = "Hallo!";
+      this-> constant = consta;
+      Serial.println(this->constant);
+    }
+
+     void onMessage(char* topic, const char* payload,unsigned int length)
+     {
+            StaticJsonBuffer<200> jsonBuffer;
+            this->payload = (char*) payload;
+            JsonObject& params = jsonBuffer.parseObject(this->payload);
+            this->constant = params["constant"];
+    }
+
+    void process()
+    {
+      Serial.println(this->constant);
+    }
+};
+
+const_stream* cs;
+
 void setup()
 {
   Serial.begin(115200);
   delay(3000);
   publisher.onMessage(callback);
-  // publisher.find_stream(PERIODIC_STREAM)->onMessage("","{\"millis\":1000}",1000);
+  cs = new const_stream("initial");
+  Serial.println(cs->constant);  
+  publisher.add_stream(cs);
 
   publisher.check_network(
     [=]() -> bool
@@ -58,7 +88,7 @@ void loop()
       {
         Serial.println("Publisher state: " + String(publisher.Publisher_state()));
       });
-   publisher.publish_stream("/test", PERIODIC_STREAM,"data");
+   publisher.publish_stream("/test", "constant","data");
 }
 
 
